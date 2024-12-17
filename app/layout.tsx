@@ -4,6 +4,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { ConvexClientProvider } from "@/providers/ConvexClientProvider";
 
+import { Toaster } from "react-hot-toast";
+
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
@@ -39,6 +41,7 @@ export default function RootLayout({
           >
            <ConvexClientProvider>
               {children}
+              <Toaster />
             </ConvexClientProvider>  
               
         </ThemeProvider>
