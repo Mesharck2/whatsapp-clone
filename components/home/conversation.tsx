@@ -4,6 +4,7 @@ import { MessageSeenSvg } from "@/lib/svgs";
 import { ImageIcon, Users, VideoIcon } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
+import { useConversationStore } from "@/store/chat-store";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const Conversation = ({ conversation }: { conversation: any }) => {
@@ -11,12 +12,16 @@ const Conversation = ({ conversation }: { conversation: any }) => {
 	const conversationName = conversation.groupName || conversation.name;
 	const lastMessage = conversation.lastMessage;
 	const lastMessageType = lastMessage?.messageType;
-
 	const me = useQuery(api.users.getMe);
+
+	const  {selectedConversation, setSelectedConversation } = useConversationStore();
+	const activeBgClass = selectedConversation?._id === conversation._id;
 
 	return (
 		<>
-			<div className={`flex gap-2 items-center p-3 hover:bg-chat-hover cursor-pointer `}>
+			<div 
+				onClick={() => setSelectedConversation(conversation)}
+				className={`flex gap-2 items-center p-3 hover:bg-chat-hover cursor-pointer ${activeBgClass ? "bg-gray-900": ""} `}>
 				<Avatar className='border border-gray-900 overflow-visible relative'>
 					{conversation.isOnline && (
 						<div className='absolute top-0 right-0 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-foreground' />
