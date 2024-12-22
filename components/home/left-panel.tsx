@@ -17,7 +17,7 @@ const LeftPanel = () => {
 	
 	const conversations = useQuery(api.conversations.getMyConversation, isAuthenticated ? undefined: "skip")
 
-	console.log(conversations);
+	// console.log(conversations);
 	
 
 	return (
