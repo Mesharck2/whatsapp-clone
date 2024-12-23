@@ -81,33 +81,52 @@ export const getMessages = query({
         )
         return messageWithSender;
     }
-})
+});
 
 
+export const sendImage = mutation({
+    args: {
+        imgId: v.id("_storage"),
+        sender: v.id("users"),
+        conversation: v.id("conversations")
+    },
+    handler: async(ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if(!identity){
+            throw new ConvexError("Unauthorized");
+        }
 
-// unoptimized 
-// export const getMessages = query({
-//     args: {
-//         conversation: v.id("conversations"),
-//     },
-//     handler: async(ctx, args) => {
-//         const identity = await ctx.auth.getUserIdentity();
-//         if(!identity) {
-//             throw new ConvexError("Not authenticated");
-//         }
+        const content = (await ctx.storage.getUrl(args.imgId)) as string;
 
-//         const messages = await ctx.db.query("messages")
-//         .withIndex("by_conversation", q=> q.eq("conversation", args.conversation)). collect();
+        await ctx.db.insert("messages", {
+            content: content,
+            sender: args.sender,
+            messageType: "image",
+            conversation: args.conversation
+        });
+    }
+});
 
-//         const messageWithSender = await Promise.all(
-//             messages.map(async (message) => {
-//                 const sender = await ctx.db.query("users")
-//                 .filter(q => q.eq(q.field("_id"), message.sender))
-//                 .first()
 
-//                 return {...message, sender}
-//             })
-//         )
-//         return messageWithSender;
-//     }
-// })
+export const sendVideo = mutation({
+    args: {
+        vidId: v.id("_storage"),
+        sender: v.id("users"),
+        conversation: v.id("conversations")
+    },
+    handler: async(ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if(!identity){
+            throw new ConvexError("Unauthorized");
+        }
+
+        const content = (await ctx.storage.getUrl(args.vidId)) as string;
+        
+        await ctx.db.insert("messages", {
+            content: content,
+            sender: args.sender,
+            messageType: "video",
+            conversation: args.conversation
+        });
+    }
+});

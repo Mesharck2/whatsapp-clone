@@ -16,10 +16,10 @@ import { ImageIcon, MessageSquareDiff } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Id } from "@/convex/_generated/dataModel";
-import { createConversation } from "@/convex/conversations";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import toast from "react-hot-toast";
+import { useConversationStore } from "@/store/chat-store";
 
 const UserListDialog = () => {
 	const [selectedUsers, setSelectedUsers] = useState<Id<"users">[]>([]);
@@ -43,7 +43,7 @@ const UserListDialog = () => {
 	const me = useQuery(api.users.getMe);
 	const users = useQuery(api.users.getUsers);
 
-
+	const { setSelectedConversation } = useConversationStore();
 	
 	
 	const handleCreateConversation = async() => {
@@ -69,7 +69,7 @@ const UserListDialog = () => {
 				});
 				const { storageId } = await result.json();
 
-				await createConversation({
+				conversationId = await createConversation({
 					participants: [...selectedUsers, me!._id ],
 					isGroup: true,
 					admin: me!._id,
@@ -83,8 +83,16 @@ const UserListDialog = () => {
 			setGroupName("");
 			setSelectedImage(null);
 
-			// TODO => Update a global State called "selectedConversationId"
+			const conversationName = isGroup ? groupName : users?.find((user)=> user._id === selectedUsers[0])?.name;
 			
+			setSelectedConversation({
+				_id: conversationId!,
+				participants: selectedUsers,
+				isGroup,
+				image: isGroup ? renderedImage: users?.find((user) => user._id === selectedUsers[0])?.image,
+				name: conversationName,
+				admin: me?._id,
+			});
 			
 		} catch (error) {
 			toast.error("Failed to create conversation");
@@ -101,7 +109,6 @@ const UserListDialog = () => {
 			</DialogTrigger>
 			<DialogContent>
 				<DialogHeader>
-					{/* TODO: <DialogClose /> will be here */}
 					<DialogClose ref={dialogCloseRef} />
 					<DialogTitle>USERS</DialogTitle>
 				</DialogHeader>
@@ -112,7 +119,6 @@ const UserListDialog = () => {
 						<Image src={renderedImage} fill alt='user image' className='rounded-full object-cover' />
 					</div>
 				)}
-				{/* TODO: input file */}
 
 				<input 
 					type="file"
